@@ -14,6 +14,9 @@ public abstract class BaseDao<T extends BaseModel>{
     private String[] attributes;
     private String[] attributeTypes;
     private String createAdditional;
+    private String stringUpdate;
+    private String stringInsertValues;
+    private String stringInsert;
 
     private PreparedStatement selectAll;
     private PreparedStatement selectOne;
@@ -27,17 +30,17 @@ public abstract class BaseDao<T extends BaseModel>{
         this.attributeTypes = attributeTypes;
         this.createAdditional = createAdditional;
 
-        String stringInsert = "";
-        String stringInsertValues = "";
-        String stringUpdate = "";
+        stringInsert = "";
+        stringInsertValues = "";
+        stringUpdate = "";
 
         try {
             conn  = ConnectionManager.getInstance().getConnection();
 
-            selectAll = conn.prepareStatement("SELECT * FROM " + this.table);
-            selectOne = conn.prepareStatement("SELECT * FROM " + this.table + " WHERE id=?");
+
+
             //delete = conn.prepareStatement("UPDATE " + table + " SET status=\"" + Status.ACTIVE + "\" WHERE id=?");
-            delete = conn.prepareStatement("DELETE FROM " + this.table + " WHERE id=?");
+            //delete = conn.prepareStatement("DELETE FROM " + this.table + " WHERE id=?");
 
             for(String att: attributes){
                 stringInsert += att + ",";
@@ -49,17 +52,15 @@ public abstract class BaseDao<T extends BaseModel>{
             stringInsertValues = stringInsertValues.substring(0,stringInsertValues.length() - 1);
             stringUpdate = stringUpdate.substring(0,stringUpdate.length() - 1);
 
-            insert = conn.prepareStatement("INSERT INTO " + this.table + " (" + stringInsert + ") VALUES (" + stringInsertValues + ")", Statement.RETURN_GENERATED_KEYS);
-            update = conn.prepareStatement("UPDATE " + this.table + " SET " + stringUpdate + " WHERE id=?");
 
-            createTable(false);
+            //createTable(false);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
     }
 
-    private void createTable(Boolean dropTable) throws Exception {
+    public void createTable(Boolean dropTable) throws Exception {
         if(attributes.length != attributeTypes.length){
             throw new RuntimeException("Attributes and Types sizes are different");
         }
@@ -83,6 +84,7 @@ public abstract class BaseDao<T extends BaseModel>{
 
         String sqlCreate = "CREATE TABLE IF NOT EXISTS " + table
                 + " (id INT NOT NULL AUTO_INCREMENT,"
+                + "active BOOLEAN NOT NULL DEFAULT TRUE,"
                 + attWithTypesToCreateTable
                 + "PRIMARY KEY (id)"
                 + createAdditional
@@ -95,14 +97,15 @@ public abstract class BaseDao<T extends BaseModel>{
     public abstract void setAttributesFromObj(PreparedStatement pstmt, T obj) throws SQLException;
 
     public List<T> getAll() {
-        List<T> resultado = new ArrayList<>();
+        List<T> result = new ArrayList<>();
         ResultSet rs = null;
 
         try {
+            selectAll = conn.prepareStatement("SELECT * FROM " + this.table + " WHERE active=TRUE");
             rs = selectAll.executeQuery();
 
             while (rs.next()) {
-                resultado.add(getObjFromRs(rs));
+                result.add(getObjFromRs(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -114,18 +117,18 @@ public abstract class BaseDao<T extends BaseModel>{
                 close();
             }
         }
-        return resultado;
+        return result;
     }
 
     public List<T> getAllWithWhere(String whereParams) {
-        List<T> resultado = new ArrayList<>();
+        List<T> result = new ArrayList<>();
         ResultSet rs = null;
 
         try {
             rs = conn.prepareStatement("SELECT * FROM " + table + " WHERE " + whereParams).executeQuery();
 
             while (rs.next()) {
-                resultado.add(getObjFromRs(rs));
+                result.add(getObjFromRs(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -137,20 +140,21 @@ public abstract class BaseDao<T extends BaseModel>{
                 close();
             }
         }
-        return resultado;
+        return result;
     }
 
     public T getById(int id){
-        T resultado = null;
+        T result = null;
         ResultSet rs = null;
 
         try {
+            selectOne = conn.prepareStatement("SELECT * FROM " + this.table + " WHERE id=? AND active=TRUE");
             selectOne.setInt(1, id);
 
             rs = selectOne.executeQuery();
 
             while (rs.next()) {
-                resultado = getObjFromRs(rs);
+                result = getObjFromRs(rs);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -162,20 +166,22 @@ public abstract class BaseDao<T extends BaseModel>{
                 close();
             }
         }
-        return resultado;
+        return result;
     }
 
     public int modify(T obj) {
-        int resultado = 0;
+        int result = 0;
 
         try {
-            if(getById(obj.getId()) != null){
+            if (getById(obj.getId()) != null){
+                update = conn.prepareStatement("UPDATE " + this.table + " SET " + stringUpdate + " WHERE id=?");
                 setAttributesFromObj(update, obj);
                 update.setLong(attributes.length + 1, obj.getId());
-                resultado = update.executeUpdate();
-            }else{
+                result = update.executeUpdate();
+            } else {
+                insert = conn.prepareStatement("INSERT INTO " + this.table + " (" + stringInsert + ") VALUES (" + stringInsertValues + ")", Statement.RETURN_GENERATED_KEYS);
                 setAttributesFromObj(insert, obj);
-                resultado = insert.executeUpdate();
+                result = insert.executeUpdate();
 
                 ResultSet generatedKeys = insert.getGeneratedKeys();
 
@@ -190,22 +196,23 @@ public abstract class BaseDao<T extends BaseModel>{
             close();
         }
 
-        return resultado;
+        return result;
     }
 
     public int deleteById(int id) {
-        int resultado = 0;
+        int result = 0;
 
         try {
+            delete = conn.prepareStatement("UPDATE " + table + " SET active=FALSE WHERE id=?");
             delete.setInt(1, id);
             // deleta e retorna o numero de linhas atualizadas
-            resultado = delete.executeUpdate();
+            result = delete.executeUpdate();
         } catch (SQLException ex) {
             ex.printStackTrace();
             close();
         }
 
-        return resultado;
+        return result;
     }
 
     public void close() {

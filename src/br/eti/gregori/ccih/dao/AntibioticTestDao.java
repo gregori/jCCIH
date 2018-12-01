@@ -13,7 +13,7 @@ public class AntibioticTestDao extends BaseDao<AntibioticTest> {
                 "antibiotic_test",
                 new String[] { "id_antibiogram", "id_antibiotic", "resistant" },
                 new String[] { "INT", "INT", "BOOLEAN" },
-                "FOREIGN KEY (id_antibiogram) REFERENCES anti_biogram(id)" +
+                "FOREIGN KEY (id_antibiogram) REFERENCES antibiogram(id)," +
                 "FOREIGN KEY (id_antibiotic) REFERENCES antibiotic(id)"
         );
 

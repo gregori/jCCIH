@@ -11,11 +11,11 @@ public class AntibiogramDao extends BaseDao<Antibiogram> {
 
     private AntibiogramDao() {
         super(
-                "anti_biogram",
+                "antibiogram",
                 new String[] { "id_bacteria", "id_location", "id_material" },
                 new String[] { "INT", "INT", "INT" },
-                "FOREIGN KEY (id_bacteria) REFERENCES bacteria(id)" +
-                "FOREIGN KEY (id_location) REFERENCES location(id)" +
+                "FOREIGN KEY (id_bacteria) REFERENCES bacteria(id)," +
+                "FOREIGN KEY (id_location) REFERENCES location(id)," +
                 "FOREIGN KEY (id_material) REFERENCES material(id)"
         );
     }

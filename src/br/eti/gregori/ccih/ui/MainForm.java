@@ -35,16 +35,10 @@ public class MainForm {
     private JButton btnEditAntibiogram;
     private JButton btnSearchAntibiogram;
     private JTable tblAntibiogram;
-    private JPanel panelMain;
+    private JPanel contentPane;
     private DefaultTableModel bacteriaTableModel;
 
     public MainForm() {
-        JFrame frame = new JFrame("Perfil Microbiológico");
-        frame.setContentPane(panelMain);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
-
         MainForm mainFormFrame = this;
 
         String[] bacteriaColumns = { "id", "Nome", "Gram" };
@@ -53,6 +47,9 @@ public class MainForm {
         findBacterias();
     }
 
+    public JPanel getContentPane() {
+        return contentPane;
+    }
 
     public void findBacterias() {
         List<Bacteria> bacterias = BacteriaDao.getInstance().getAll();
@@ -69,4 +66,5 @@ public class MainForm {
         }
 
     }
+
 }

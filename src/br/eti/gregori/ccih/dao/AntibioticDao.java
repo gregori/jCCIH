@@ -15,7 +15,7 @@ public class AntibioticDao extends BaseDao<Antibiotic> {
         super(
                 "antibiotic",
                 new String[] { "name", "acronym", "gram" },
-                new String[] { "VARCHAR(255)", "ENUM(" + EnumUtil.getStrings(Gram.class) + ")" },
+                new String[] { "VARCHAR(255)", "VARCHAR(10)", "ENUM(" + EnumUtil.getStrings(Gram.class) + ")" },
                 ""
         );
     }
