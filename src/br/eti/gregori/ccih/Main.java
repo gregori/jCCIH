@@ -1,7 +1,6 @@
 package br.eti.gregori.ccih;
 
 import br.eti.gregori.ccih.dao.*;
-import br.eti.gregori.ccih.model.AntibioticTest;
 import br.eti.gregori.ccih.ui.MainForm;
 import br.eti.gregori.ccih.util.PropertyParser;
 

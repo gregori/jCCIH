@@ -18,14 +18,18 @@ public class BacteriaForm {
     private boolean isEdit;
     private Bacteria bacteria;
 
-    public BacteriaForm(MainForm frmMainForm) {
+    public BacteriaForm(MainForm frmMainForm, boolean isEdit) {
         bacteria = new Bacteria();
+        this.isEdit = isEdit;
+
         JFrame frame = new JFrame("Cadastro de Bactérias");
         frame.setContentPane(panelBacteria);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.pack();
+        frame.setLocationRelativeTo(frmMainForm.getContentPane());
+        //frame.setLocation(frmMainForm.getContentPane().getX()/2-frame.getSize().width/2, frmMainForm.getContentPane().getY()/2-frame.getSize().height/2);
         frame.setVisible(true);
-
+        cmbGram.addItem("Escolha um");
         for (Gram gram : Gram.values()) {
             cmbGram.addItem(gram);
         }
@@ -68,5 +72,11 @@ public class BacteriaForm {
                 frame.dispose();
             }
         });
+    }
+
+    public void setBacteria(Bacteria bacteria) {
+        this.bacteria = bacteria;
+        txtName.setText(bacteria.getName());
+        cmbGram.setSelectedItem(bacteria.getGram());
     }
 }
